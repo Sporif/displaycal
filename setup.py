@@ -1,8 +1,8 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-from __future__ import with_statement
-from ConfigParser import RawConfigParser
+
+from configparser import RawConfigParser
 from distutils.sysconfig import get_python_lib
 from distutils.util import change_root, get_platform
 from hashlib import md5, sha1
@@ -100,12 +100,12 @@ def format_chglog(chglog, format="appstream"):
 	else:
 		raise ValueError("Changelog format not supported: %r" % format)
 	if format.lower() == "rpm":
-		chglog = u""
+		chglog = ""
 		for lvl1 in tree:
 			if lvl1.tag in ("ol", "ul"):
 				for lvl2 in lvl1:
 					if lvl2.tag == "li":
-						chglog += u"  * %s" % lvl2.text.lstrip()
+						chglog += "  * %s" % lvl2.text.lstrip()
 						links = []
 						nlinks = 1
 						for lvl3 in lvl2:
@@ -114,7 +114,7 @@ def format_chglog(chglog, format="appstream"):
 									chglog += "\n"
 								for lvl4 in lvl3:
 									if lvl4.tag == "li":
-										chglog += u"    %s" % lvl4.text.lstrip()
+										chglog += "    %s" % lvl4.text.lstrip()
 										for lvl5 in lvl4:
 											if lvl5.tag == "a":
 												# Collect links
@@ -141,7 +141,7 @@ def format_chglog(chglog, format="appstream"):
 	else:
 		# Nice formatting
 		from xml.sax.saxutils import escape
-		chglog = u""
+		chglog = ""
 		nump = 0
 		maxp = 3
 		for lvl1 in tree:
@@ -151,12 +151,12 @@ def format_chglog(chglog, format="appstream"):
 					if nump == maxp:
 						continue
 					nump += 1
-				chglog += u"\t\t\t\t<%s>\n" % lvl1.tag
+				chglog += "\t\t\t\t<%s>\n" % lvl1.tag
 				if text:
-					chglog += u"\t\t\t\t\t%s\n" % escape(text)
+					chglog += "\t\t\t\t\t%s\n" % escape(text)
 				for lvl2 in lvl1:
 					if lvl2.tag == "li":
-						chglog += u"\t\t\t\t\t<li>\n\t\t\t\t\t\t%s\n" % escape(lvl2.text.strip())
+						chglog += "\t\t\t\t\t<li>\n\t\t\t\t\t\t%s\n" % escape(lvl2.text.strip())
 						for lvl3 in lvl2:
 							if lvl3.tag in ("p", "ol", "ul"):
 								text = lvl3.text.strip()
@@ -164,15 +164,15 @@ def format_chglog(chglog, format="appstream"):
 									if nump == maxp:
 										continue
 									nump += 1
-								chglog += u"\t\t\t\t\t\t<%s>\n" % lvl3.tag
+								chglog += "\t\t\t\t\t\t<%s>\n" % lvl3.tag
 								if text:
-									chglog += u"\t\t\t\t\t\t\t%s\n" % escape(text)
+									chglog += "\t\t\t\t\t\t\t%s\n" % escape(text)
 								for lvl4 in lvl3:
 									if lvl4.tag == "li":
-										chglog += u"\t\t\t\t\t\t\t<li>%s</li>\n" % escape(lvl4.text.strip())
-								chglog += u"\t\t\t\t\t\t</%s>\n" % lvl3.tag
-						chglog += u"\t\t\t\t\t</li>\n"
-				chglog += u"\t\t\t\t</%s>\n" % lvl1.tag
+										chglog += "\t\t\t\t\t\t\t<li>%s</li>\n" % escape(lvl4.text.strip())
+								chglog += "\t\t\t\t\t\t</%s>\n" % lvl3.tag
+						chglog += "\t\t\t\t\t</li>\n"
+				chglog += "\t\t\t\t</%s>\n" % lvl1.tag
 		chglog = chglog.rstrip()
 	return chglog
 
@@ -237,7 +237,7 @@ def replace_placeholders(tmpl_path, out_path, lastmod_time=0, iterable=None):
 		"YEAR": strftime("%Y", gmtime(lastmod_time or 
 									  os.stat(tmpl_path).st_mtime))}
 	mapping.update(iterable or {})
-	for key, val in mapping.iteritems():
+	for key, val in mapping.items():
 		tmpl_data = tmpl_data.replace("${%s}" % key, val)
 	tmpl_data = tmpl_data.replace("%s-%s" % (mapping["YEAR"],
 											 mapping["YEAR"]), mapping["YEAR"])
@@ -255,11 +255,11 @@ def replace_placeholders(tmpl_path, out_path, lastmod_time=0, iterable=None):
 
 
 def svnversion_bump(svnversion):
-	print "Bumping version number %s ->" % \
-		  ".".join(svnversion),
+	print("Bumping version number %s ->" % \
+		  ".".join(svnversion), end=' ')
 	svnversion = svnversion_parse(
 		str(int("".join(svnversion)) + 1))
-	print ".".join(svnversion)
+	print(".".join(svnversion))
 	return svnversion
 
 
@@ -333,8 +333,7 @@ def setup():
 	
 	lastmod_time = 0
 	
-	non_build_args = filter(lambda arg: arg in sys.argv[1:], 
-							["bdist_appdmg", "clean", "purge", "purge_dist", 
+	non_build_args = [arg for arg in ["bdist_appdmg", "clean", "purge", "purge_dist", 
 							 "uninstall", "-h", "--help", "--help-commands", 
 							 "--all", "--name", "--fullname", "--author", 
 							 "--author-email", "--maintainer", 
@@ -346,18 +345,18 @@ def setup():
 							 "--requires", "--obsoletes", "--quiet", "-q", 
 							 "register", "--list-classifiers", "upload",
 							 "--use-distutils", "--use-setuptools",
-							 "--verbose", "-v", "finalize_msi"])
+							 "--verbose", "-v", "finalize_msi"] if arg in sys.argv[1:]]
 
 	if os.path.isdir(os.path.join(pydir, ".svn")) and (which("svn") or
 													   which("svn.exe")) and (
 	   not sys.argv[1:] or (len(non_build_args) < len(sys.argv[1:]) and 
 							not help)):
-		print "Trying to get SVN version information..."
+		print("Trying to get SVN version information...")
 		svnversion = None
 		try:
 			p = Popen(["svnversion"], stdout=sp.PIPE, cwd=pydir)
-		except Exception, exception:
-			print "...failed:", exception
+		except Exception as exception:
+			print("...failed:", exception)
 		else:
 			svnversion = p.communicate()[0]
 			svnversion = strtr(svnversion.strip().split(":")[-1], "MPS")
@@ -371,7 +370,7 @@ def setup():
 			svnversion = svnversion_parse(str(svnversion))
 			svnbase = svnversion
 		
-		print "Trying to get SVN information..."
+		print("Trying to get SVN information...")
 		mod = False
 		lastmod = ""
 		entries = []
@@ -379,8 +378,8 @@ def setup():
 		while not entries:
 			try:
 				p = Popen(args, stdout=sp.PIPE, cwd=pydir)
-			except Exception, exception:
-				print "...failed:", exception
+			except Exception as exception:
+				print("...failed:", exception)
 				break
 			else:
 				from xml.dom import minidom
@@ -403,7 +402,7 @@ def setup():
 				props = status[0].getAttribute("props")
 				if props.lower() in ("none", "normal"):
 					props = " "
-				print item.upper()[0] + props.upper()[0] + " " * 5, pth
+				print(item.upper()[0] + props.upper()[0] + " " * 5, pth)
 				mod = True
 				if item.upper()[0] != "D" and os.path.exists(pth):
 					mtime = os.stat(pth).st_mtime
@@ -414,7 +413,7 @@ def setup():
 			if schedule:
 				schedule = schedule[0].firstChild.wholeText.strip()
 				if schedule != "normal":
-					print schedule.upper()[0] + " " * 6, pth
+					print(schedule.upper()[0] + " " * 6, pth)
 					mod = True
 					mtime = os.stat(pth).st_mtime
 					if mtime > lastmod_time:
@@ -437,7 +436,7 @@ def setup():
 			## print lmdate, lastmod, pth
 		
 		if not dry_run:
-			print "Generating __version__.py"
+			print("Generating __version__.py")
 			versionpy = open(os.path.join(pydir, "DisplayCAL", "__version__.py"), "w")
 			versionpy.write("# generated by setup.py\n\n")
 			buildtime = time.time()
@@ -452,7 +451,7 @@ def setup():
 				if mod:
 					svnversion = svnversion_bump(svnversion)
 				else:
-					print "Version", ".".join(svnversion)
+					print("Version", ".".join(svnversion))
 				versionpy.write("VERSION = (%s)\n" % ", ".join(svnversion))
 				versionpy.write("VERSION_BASE = (%s)\n" % ", ".join(svnbase))
 				versionpy.write("VERSION_STRING = %r\n" % ".".join(svnversion))
@@ -512,7 +511,7 @@ def setup():
 		# "pyinstaller/bincache*" directories and their contents recursively
 
 		if dry_run:
-			print "dry run - nothing will be removed"
+			print("dry run - nothing will be removed")
 
 		paths = []
 		if purge:
@@ -526,14 +525,14 @@ def setup():
 		for path in paths:
 			if os.path.exists(path):
 				if dry_run:
-					print path
+					print(path)
 					continue
 				try:
 					shutil.rmtree(path)
-				except Exception, exception:
-					print exception
+				except Exception as exception:
+					print(exception)
 				else:
-					print "removed", path
+					print("removed", path)
 		if len(sys.argv) == 1 or (len(sys.argv) == 2 and dry_run):
 			return
 
@@ -637,7 +636,7 @@ def setup():
 											  (name, tmpl_type))
 			inno_template = open(inno_template_path, "r")
 			inno_script = inno_template.read().decode("UTF-8", "replace") % {
-				"AppCopyright": u"© %s %s" % (strftime("%Y"), author),
+				"AppCopyright": "© %s %s" % (strftime("%Y"), author),
 				"AppName": name,
 				"AppVerName": version,
 				"AppPublisher": author,
@@ -780,7 +779,7 @@ def setup():
 
 	if (not zeroinstall and not buildservice and
 		not appdata and not bdist_appdmg and not bdist_pkg) or sys.argv[1:]:
-		print sys.argv[1:]
+		print(sys.argv[1:])
 		from setup import setup
 		setup()
 	
@@ -955,7 +954,7 @@ def setup():
 		p = Popen(["0install", "digest", archive_path.encode(fs_enc), extract],
 				  stdout=sp.PIPE, cwd=pydir)
 		stdout, stderr = p.communicate()
-		print stdout
+		print(stdout)
 		hash = re.search("(sha\d+\w+[=_][0-9a-f]+)", stdout.strip())
 		if not hash:
 			raise SystemExit(p.wait())
@@ -1044,7 +1043,7 @@ def setup():
 						implementation.appendChild(archive)
 					else:
 						digest = implementation.getElementsByTagName("manifest-digest")[0]
-						for attrname, value in digest.attributes.items():
+						for attrname, value in list(digest.attributes.items()):
 							# Remove existing hashes
 							digest.removeAttribute(attrname)
 						archive = implementation.getElementsByTagName("archive")[0]
@@ -1116,7 +1115,7 @@ def setup():
 							entry_point.appendChild(icon)
 						interface.appendChild(entry_point)
 				# Update feed
-				print "Updating 0install feed", dist_path
+				print("Updating 0install feed", dist_path)
 				with open(dist_path, "wb") as dist_file:
 					xml = domtree.toprettyxml(encoding="utf-8")
 					xml = re.sub(r"\n\s+\n", "\n", xml)
@@ -1132,7 +1131,7 @@ def setup():
 								"http://0install.de/feeds/ZeroInstall_Tools.xml"]
 				if zeropublish:
 					passphrase_path = os.path.join(pydir, "gpg", "passphrase.txt")
-					print "Signing", dist_path
+					print("Signing", dist_path)
 					if os.path.isfile(passphrase_path):
 						import wexpect
 						with open(passphrase_path) as passphrase_file:
@@ -1149,7 +1148,7 @@ def setup():
 					else:
 						call([zeropublish] + args + ["-x", dist_path.encode(fs_enc)])
 				else:
-					print "WARNING: 0publish not found, please sign the feed!"
+					print("WARNING: 0publish not found, please sign the feed!")
 		# Create 0install app bundles
 		bundletemplate = os.path.join("0install", "template.app", "Contents")
 		bundletemplatepath = os.path.join(pydir, bundletemplate)
@@ -1199,7 +1198,7 @@ def setup():
 									 lastmod_time,
 									 {"EXEC": run,
 									  "ZEROINSTALL_VERSION": zeroinstall_version})
-				os.chmod(os.path.join(bundledistpath, "MacOS", script), 0755)
+				os.chmod(os.path.join(bundledistpath, "MacOS", script), 0o755)
 				for binary in os.listdir(os.path.join(bundletemplatepath,
 													  "MacOS")):
 					if binary == "template":
